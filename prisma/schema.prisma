@@ -1,0 +1,133 @@
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+}
+
+// ============================================================
+// RUA DATABASES SCHEMA
+// ============================================================
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  COLLABORATOR
+  VIEWER
+}
+
+enum ProposalStatus {
+  DRAFT
+  PENDING
+  SIGNED
+  BLOCKED
+}
+
+enum OnboardingStatus {
+  PENDING_INFO
+  IN_PROGRESS
+  APPROVED
+  COMPLETED
+}
+
+model User {
+  id                 String     @id @default(uuid())
+  name               String
+  email              String     @unique
+  password           String
+  role               UserRole   @default(COLLABORATOR)
+  twoFactorSecret    String?
+  isTwoFactorEnabled Boolean    @default(false)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  proposalsCreated   Proposal[] @relation("ProposalCreator")
+  decisions          DecisionLog[]
+}
+
+model Project {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  type        String     // e.g., "Servicio Digital", "Bot Administrativo"
+  emoji       String     @default("📁")
+  progress    Int        @default(0)
+  status      String     @default("Activo")
+  color       String     @default("#6C63FF")
+  description String?    @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  documents   Document[]
+  clients     Client[]   @relation("ProjectClients")
+}
+
+model Proposal {
+  id          String         @id @default(uuid())
+  title       String
+  description String?        @db.Text
+  content     String         @db.LongText // Raw markdown or JSON of proposal details
+  type        String         // e.g., "Técnica", "Estratégica", "Operativa"
+  status      ProposalStatus @default(DRAFT)
+  creatorId   String
+  creator     User           @relation("ProposalCreator", fields: [creatorId], references: [id])
+  signedAt    DateTime?
+  hashSha256  String?        @unique // Immutable integrity fingerprint
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  decision    DecisionLog?
+}
+
+model Document {
+  id          String   @id @default(uuid())
+  name        String
+  type        String   // e.g., "SPO", "Report", "Policy"
+  version     String   @default("1.0")
+  content     String   @db.LongText
+  isSigned    Boolean  @default(false)
+  hash        String?  // Fingerprint of the doc version
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Client {
+  id               String           @id @default(uuid())
+  name             String
+  contact          String?
+  onboardingStatus OnboardingStatus @default(PENDING_INFO)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  projects         Project[]        @relation("ProjectClients")
+}
+
+model DecisionLog {
+  id           String    @id @default(uuid())
+  proposalId   String    @unique
+  proposal     Proposal  @relation(fields: [proposalId], references: [id])
+  action       String    // e.g., "SIGNED", "REJECTED"
+  actorId      String
+  actor        User      @relation(fields: [actorId], references: [id])
+  timestamp    DateTime  @default(now())
+  hash         String    @unique // Current decision state block hash
+  previousHash String    // Parent block hash (blockchain-style integrity chain)
+}
+
+model ApiIntegration {
+  id          String    @id @default(uuid())
+  serviceName String    @unique // e.g., "Ferrebot", "BrandIdentity", "DisenoWeb"
+  status      String    @default("INACTIVE") // ACTIVE, INACTIVE, ERROR
+  lastSync    DateTime?
+  config      String?   @db.Text // Encrypted JSON configuration
+  logs        String?   @db.LongText // Run logs or integration status
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  role      String   // "rua" or "user"
+  text      String   @db.Text
+  createdAt DateTime @default(now())
+}
