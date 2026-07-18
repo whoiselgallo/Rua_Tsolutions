@@ -205,6 +205,7 @@ export default function DashboardPage() {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [conversationId, setConversationId] = useState("");
 
   async function handleSend() {
     const text = input.trim();
@@ -219,9 +220,13 @@ export default function DashboardPage() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, conversationId }),
       });
       const data = await res.json();
+      
+      if (data.conversationId) {
+        setConversationId(data.conversationId);
+      }
       
       const ruaMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
