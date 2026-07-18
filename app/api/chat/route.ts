@@ -59,7 +59,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("OpenAI Error:", error);
     return NextResponse.json(
-      { error: "Error conectando con RUA Core. Intenta de nuevo.", details: error.message },
+      { error: `Error RUA Core: ${error.message}` },
       { status: 500 }
     );
   }
