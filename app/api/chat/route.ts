@@ -24,7 +24,6 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({
           input: message,
-          store: true,
           prompt: {
             id: process.env.OPENAI_PROMPT_ID,
             version: process.env.OPENAI_PROMPT_VERSION || "2",
