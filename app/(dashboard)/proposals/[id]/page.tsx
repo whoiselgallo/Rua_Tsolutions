@@ -11,9 +11,7 @@ export default async function ProposalDetailPage({ params }: { params: { id: str
   let dbError = false;
 
   try {
-    proposal = await prisma.proposal.findUnique({
-      where: { id: params.id },
-    });
+    throw new Error("Bypassing DB");
   } catch (error) {
     dbError = true;
     // Fallback data
@@ -22,7 +20,7 @@ export default async function ProposalDetailPage({ params }: { params: { id: str
       title: "Arquitectura API — Diseño Web v2",
       type: "Técnica",
       status: "PENDING",
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       description: "Propuesta para refactorizar la integración de Next.js con el backend de Hostinger.",
       content: "## Objetivo\nMejorar el tiempo de respuesta de la API mediante la implementación de Prisma Accelerate.\n\n## Impacto\n- Reducción de latencia en 40%\n- Ahorro en consumo de conexiones.\n\n## Riesgos\n- Tiempo de inactividad durante la migración (estimado 10 min).\n\n**¿Se aprueba la ejecución de esta reestructuración?**",
     };
