@@ -24,6 +24,7 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({
           input: message,
+          tools: [], // Deshabilitar herramientas (como DALL-E) que causan conflicto sin streaming
           prompt: {
             id: process.env.OPENAI_PROMPT_ID,
             version: process.env.OPENAI_PROMPT_VERSION || "2",
