@@ -14,7 +14,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "DIFY_API_KEY no configurada en Vercel" }, { status: 500 });
     }
 
-    const difyUrl = process.env.DIFY_API_URL || "https://api.dify.ai/v1/chat-messages";
+    let difyUrl = process.env.DIFY_API_URL || "https://api.dify.ai/v1";
+    if (!difyUrl.endsWith("/chat-messages")) {
+      // Remove trailing slash if exists, then append /chat-messages
+      difyUrl = `${difyUrl.replace(/\/$/, "")}/chat-messages`;
+    }
 
     const response = await fetch(difyUrl, {
       method: "POST",
