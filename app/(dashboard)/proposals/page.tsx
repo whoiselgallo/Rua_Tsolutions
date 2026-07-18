@@ -63,7 +63,7 @@ export default async function ProposalsPage() {
                 </td>
               </tr>
             ) : (
-              proposals.map((p) => (
+              proposals.map((p: any) => (
                 <tr key={p.id} style={{ borderBottom: "1px solid var(--rua-border)", transition: "background 0.2s" }} className="hover-row">
                   <td style={{ padding: "var(--space-4)", fontWeight: 500, color: "var(--rua-text)" }}>{p.title}</td>
                   <td style={{ padding: "var(--space-4)", color: "var(--rua-muted)", fontSize: "0.875rem" }}>{p.type}</td>
