@@ -14,20 +14,35 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Mensaje vacío" }, { status: 400 });
     }
 
-    // Si el usuario provee un prompt ID específico, usamos la nueva API de Responses
+    // Si el usuario provee un prompt ID específico, usamos la nueva API de Responses mediante fetch
     if (process.env.OPENAI_PROMPT_ID) {
-      // Nota: Esta es la sintaxis específica proporcionada por el usuario
-      const response = await (openai as any).responses.create({
-        model: "gpt-5.4-mini", // Especificado en el prompt original
-        input: message,
-        store: true,
-        prompt: {
-          id: process.env.OPENAI_PROMPT_ID,
-          version: process.env.OPENAI_PROMPT_VERSION || "2",
+      const response = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
+        body: JSON.stringify({
+          input: message,
+          store: true,
+          prompt: {
+            id: process.env.OPENAI_PROMPT_ID,
+            version: process.env.OPENAI_PROMPT_VERSION || "2",
+          },
+        }),
       });
 
-      return NextResponse.json({ reply: response.output_text || response.choices?.[0]?.message?.content || "Respuesta generada por RUA" });
+      if (!response.ok) {
+        const errData = await response.text();
+        console.error("OpenAI Fetch Error:", errData);
+        // Si el endpoint de responses falla (ej. si no está activo), caemos al bloque catch
+        throw new Error(`OpenAI API falló con status ${response.status}: ${errData}`);
+      }
+
+      const data = await response.json();
+      return NextResponse.json({ 
+        reply: data.output_text || data.choices?.[0]?.message?.content || "Respuesta generada por RUA" 
+      });
     }
 
     // Fallback al chat estándar si no hay prompt ID
