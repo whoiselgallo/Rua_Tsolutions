@@ -1,5 +1,6 @@
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -66,7 +67,7 @@ model Proposal {
   id          String         @id @default(uuid())
   title       String
   description String?        @db.Text
-  content     String         @db.LongText // Raw markdown or JSON of proposal details
+  content     String         @db.Text // Raw markdown or JSON of proposal details
   type        String         // e.g., "Técnica", "Estratégica", "Operativa"
   status      ProposalStatus @default(DRAFT)
   creatorId   String
@@ -83,7 +84,7 @@ model Document {
   name        String
   type        String   // e.g., "SPO", "Report", "Policy"
   version     String   @default("1.0")
-  content     String   @db.LongText
+  content     String   @db.Text
   isSigned    Boolean  @default(false)
   hash        String?  // Fingerprint of the doc version
   projectId   String
@@ -120,7 +121,7 @@ model ApiIntegration {
   status      String    @default("INACTIVE") // ACTIVE, INACTIVE, ERROR
   lastSync    DateTime?
   config      String?   @db.Text // Encrypted JSON configuration
-  logs        String?   @db.LongText // Run logs or integration status
+  logs        String?   @db.Text // Run logs or integration status
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }

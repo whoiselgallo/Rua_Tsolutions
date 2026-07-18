@@ -12,8 +12,9 @@ export default async function ProposalsPage() {
   let dbError = false;
 
   try {
-    // Force fallback data for now to avoid Vercel 500 errors
-    throw new Error("Bypassing DB");
+    proposals = await prisma.proposal.findMany({
+      orderBy: { createdAt: "desc" },
+    });
   } catch (error) {
     dbError = true;
     // Datos de fallback

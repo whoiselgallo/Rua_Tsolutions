@@ -11,7 +11,9 @@ export default async function ProposalDetailPage({ params }: { params: { id: str
   let dbError = false;
 
   try {
-    throw new Error("Bypassing DB");
+    proposal = await prisma.proposal.findUnique({
+      where: { id: params.id },
+    });
   } catch (error) {
     dbError = true;
     // Fallback data
