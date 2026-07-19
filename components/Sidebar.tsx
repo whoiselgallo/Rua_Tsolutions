@@ -63,9 +63,9 @@ const navItems = [
   { href: "/projects",   label: "Proyectos",    icon: icons.projects   },
   { href: "/proposals",  label: "Propuestas",   icon: icons.proposals  },
   { href: "/memory",     label: "Memoria",      icon: icons.memory     },
-  { href: "/ops",        label: "Operaciones",  icon: icons.ops        },
+  { href: "/operations",label: "Operaciones",  icon: icons.ops        },
   { href: "/studio",     label: "Studio",       icon: icons.studio     },
-  { href: "/integra",    label: "Integraciones",icon: icons.integra    },
+  { href: "/integrations",label: "Integraciones",icon: icons.integra    },
 ];
 
 export default function Sidebar() {
